@@ -51,7 +51,7 @@ public class ReservationService {
     public List<Reservation> findAllReservation(){
         List<ReservationEntity> allEntity = repo.findAll();
         return  allEntity.stream()
-                .map(entity -> mapper.toReservation(entity))
+                .map(ReservationMapper::toReservation)
                 .toList();
     }
 

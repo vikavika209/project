@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReservationMapper {
 
-    public Reservation toReservation (ReservationEntity entity){
+    public static Reservation toReservation(ReservationEntity entity){
         return new Reservation(entity.getId(),
                 entity.getUserId(),
                 entity.getRoomId(),
