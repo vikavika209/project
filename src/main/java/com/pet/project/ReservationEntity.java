@@ -36,10 +36,4 @@ public class ReservationEntity {
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
-    public ReservationEntity(Long userId, Long roomId, LocalDate startDate, LocalDate endDate) {
-        this.userId = userId;
-        this.roomId = roomId;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
 }

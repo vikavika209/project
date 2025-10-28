@@ -50,10 +50,9 @@ public class ReservationService {
 
     public List<Reservation> findAllReservation(){
         List<ReservationEntity> allEntity = repo.findAll();
-        List<Reservation> allReservations = allEntity.stream()
+        return  allEntity.stream()
                 .map(entity -> mapper.toReservation(entity))
                 .toList();
-        return allReservations;
     }
 
     public void deleteReservation(Long id){
