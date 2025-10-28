@@ -38,6 +38,7 @@ public class ReservationController {
             log.info("Called getReservationById: id = {}", id);
             return ResponseEntity.ok(reservationService.getReservationById(id));
         }catch (EntityNotFoundException e){
+            log.error("Can't get with id = {} {}", id, e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -57,6 +58,21 @@ public class ReservationController {
             reservationService.deleteReservation(id);
             return ResponseEntity.ok("Reservation has been removed with id = " + id);
         }catch (NoSuchElementException e){
+            log.error("Can't delete: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateById(
+            @PathVariable("id") Long id,
+            @RequestBody Reservation reservation
+    ) {
+        try{
+            log.info("Called updateById for id = {}", id );
+            return ResponseEntity.ok(reservationService.updatereservation(id, reservation));
+        }catch (IllegalStateException e){
+            log.error("Can't update: {}", e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

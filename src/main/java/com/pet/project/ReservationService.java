@@ -64,4 +64,22 @@ public class ReservationService {
         log.info("Reservation has been removed with id = {}", id);
         repo.delete(entity);
     }
+
+    public Reservation updatereservation (Long id, Reservation reservation){
+        Reservation reservationById = getReservationById(id);
+
+        if (reservationById.getReservationStatus() != ReservationStatus.PENDING){
+            throw new IllegalStateException("Can't modify reservation: status = " + reservationById.getReservationStatus().toString());
+        }
+
+        reservationById.setUserId(reservation.getUserId());
+        reservationById.setRoomId(reservation.getRoomId());
+        reservationById.setStartDate(reservation.getStartDate());
+        reservationById.setEndDate(reservation.getEndDate());
+
+        ReservationEntity entity = mapper.toEntity(reservationById);
+        ReservationEntity save = repo.save(entity);
+
+        return mapper.toReservation(save);
+    }
 }
