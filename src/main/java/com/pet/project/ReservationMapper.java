@@ -15,7 +15,7 @@ public class ReservationMapper {
         );
     }
 
-    public ReservationEntity toEntity (Reservation reservation){
+    public static ReservationEntity toEntity (Reservation reservation){
         return new ReservationEntity(reservation.getId(),
                 reservation.getUserId(),
                 reservation.getRoomId(),
