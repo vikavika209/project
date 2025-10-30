@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -18,14 +17,9 @@ public class ReservationService {
 
     public Reservation create (Reservation reservation){
 
-        if (reservation.getEndDate().isBefore(reservation.getStartDate())) {
+        if (!reservation.getEndDate().isAfter(reservation.getStartDate())) {
             log.error("StartDate must be before EndDate");
             throw new IllegalArgumentException("StartDate must be before EndDate");
-        }
-
-        if (reservation.getId() != null) {
-            log.error("Id must be empty");
-            throw new IllegalArgumentException("Id must be empty");
         }
 
         if (reservation.getReservationStatus() != null) {
@@ -62,22 +56,43 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long id){
+    public void cancelReservationById (Long id){
         Optional<ReservationEntity> byId = repo.findById(id);
+
         ReservationEntity entity = byId
                 .orElseThrow(() ->
-                        new NoSuchElementException("Reservation not found with id = " + id));
+                        new EntityNotFoundException("Reservation not found with id = " + id));
+
+        if(entity.getReservationStatus().equals(ReservationStatus.APPROVED)){
+            log.error("Can't cancel reservation with id = {}", id);
+            throw new IllegalStateException(
+                    "Can't cancel reservation. Please contact your personal manager"
+            );
+        }
+
+        if(entity.getReservationStatus().equals(ReservationStatus.CANCELLED)){
+            log.error("Can't cancel reservation with id = {}", id);
+            throw new IllegalStateException(
+                    "Can't cancel. The reservation was canceled before"
+            );
+        }
 
         repo.setStatus(id, ReservationStatus.CANCELLED);
+
         log.info("Reservation has been removed with id = {}", id);
     }
 
-    public Reservation updatereservation (Long id, Reservation reservation){
+    public Reservation updateReservation(Long id, Reservation reservation){
         Reservation reservationById = ReservationMapper.toReservation(
                 repo.findById(id)
                         .orElseThrow(
-                                () -> new NoSuchElementException("Not found with id = " + id))
+                                () -> new EntityNotFoundException("Not found with id = " + id))
         );
+
+        if (!reservation.getEndDate().isAfter(reservation.getStartDate())) {
+            log.error("StartDate must be before EndDate");
+            throw new IllegalArgumentException("StartDate must be before EndDate");
+        }
 
         if (reservationById.getReservationStatus() != ReservationStatus.PENDING){
             throw new IllegalStateException("Can't modify reservation: status = " + reservationById.getReservationStatus().toString());
@@ -127,7 +142,7 @@ public class ReservationService {
     public Reservation approveReservation (Long id){
         ReservationEntity entity = repo.findById(id)
                 .orElseThrow(() ->
-                        new NoSuchElementException("Not found with id = " + id));
+                        new EntityNotFoundException("Not found with id = " + id));
 
         Reservation reservation = ReservationMapper.toReservation(entity);
 

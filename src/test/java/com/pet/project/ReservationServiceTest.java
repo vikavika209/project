@@ -111,7 +111,7 @@ class ReservationServiceTest {
                 .build();
 
         Assertions.assertThrows(NoSuchElementException.class,
-                () -> service.updatereservation(1L, reservation)
+                () -> service.updateReservation(1L, reservation)
                 );
     }
 
@@ -134,7 +134,7 @@ class ReservationServiceTest {
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(entity));
 
         Assertions.assertThrows(IllegalStateException.class,
-                () -> service.updatereservation(1L, reservation)
+                () -> service.updateReservation(1L, reservation)
         );
 
     }
@@ -162,7 +162,7 @@ class ReservationServiceTest {
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(entity));
 
-        Reservation updatereservation = service.updatereservation(1L, afterUpdating);
+        Reservation updatereservation = service.updateReservation(1L, afterUpdating);
 
         Assertions.assertEquals(LocalDate.parse("15.01.2025", formatter), updatereservation.getEndDate());
     }
