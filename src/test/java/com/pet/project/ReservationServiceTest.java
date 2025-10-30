@@ -1,5 +1,7 @@
 package com.pet.project;
 
+import com.pet.project.reservations.*;
+import com.pet.project.web.NotApprovedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

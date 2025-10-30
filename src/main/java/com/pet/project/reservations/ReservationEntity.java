@@ -1,4 +1,4 @@
-package com.pet.project;
+package com.pet.project.reservations;
 
 import jakarta.persistence.*;
 import lombok.*;

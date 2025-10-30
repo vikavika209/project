@@ -1,4 +1,4 @@
-package com.pet.project;
+package com.pet.project.reservations;
 
 import org.springframework.stereotype.Component;
 

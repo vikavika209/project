@@ -1,8 +1,9 @@
-package com.pet.project;
+package com.pet.project.reservations;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,9 +34,22 @@ public class ReservationController {
     }
 
     @GetMapping()
-    public List<Reservation> getAllReservations(){
+    public ResponseEntity<List<Reservation>> getAllReservations(
+            @RequestParam(name = "roomId", required = false) Long roomId,
+            @RequestParam(name = "userId", required = false) Long userId,
+            @RequestParam(name = "status", required = false) ReservationStatus status,
+            @RequestParam(name = "pageSize", required = false) Integer pageSize,
+            @RequestParam(name = "pageNumber", required = false) Integer pageNumber
+    ){
         log.info("Called getAllReservations");
-        return reservationService.findAllReservation();
+        var filter = new ReservationSearchFilter(
+                roomId,
+                userId,
+                status,
+                pageSize,
+                pageNumber
+        );
+        return ResponseEntity.ok(reservationService.searchAllByFilter(filter));
     }
 
     @DeleteMapping("/{id}")

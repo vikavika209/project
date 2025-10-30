@@ -1,4 +1,4 @@
-package com.pet.project;
+package com.pet.project.reservations;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;

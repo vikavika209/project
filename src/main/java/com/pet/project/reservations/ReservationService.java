@@ -1,13 +1,17 @@
-package com.pet.project;
+package com.pet.project.reservations;
 
+import com.pet.project.web.NotApprovedException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -48,8 +52,25 @@ public class ReservationService {
 
     }
 
-    public List<Reservation> findAllReservation(){
-        List<ReservationEntity> allEntity = repo.findAll();
+    public List<Reservation> searchAllByFilter(
+            ReservationSearchFilter filter
+    ){
+        int pageSize = filter.pageSize() != null
+                ? filter.pageSize() : 10;
+
+        int pageNumber = filter.pageNumber() != null
+                ? filter.pageNumber() : 0;
+
+        var pageable = Pageable
+                .ofSize(pageSize)
+                .withPage(pageNumber);
+
+        Page<ReservationEntity> allEntity = repo.searchAllByFilter(
+                filter.roomId(),
+                filter.userId(),
+                filter.status(),
+                pageable
+        );
         return  allEntity.stream()
                 .map(ReservationMapper::toReservation)
                 .toList();
@@ -114,29 +135,24 @@ public class ReservationService {
     }
 
     private boolean isConflict (Reservation reservation){
+        List<Long> allWithConflict = repo.findConflictReservation(
+                reservation.getRoomId(),
+                reservation.getStartDate(),
+                reservation.getEndDate(),
+                ReservationStatus.APPROVED
+        );
 
-        List<Reservation> all = repo.findAll().stream()
-                .map(ReservationMapper::toReservation)
-                .toList();
-
-        for (Reservation exsistedReservation : all)
-        {
-            if (exsistedReservation.getId().equals(reservation.getId())){
-                continue;
-            }
-            if (!exsistedReservation.getRoomId().equals(reservation.getRoomId())){
-                continue;
-            }
-            if (!exsistedReservation.getReservationStatus().equals(ReservationStatus.APPROVED)){
-                continue;
-            }
-            if (reservation.getStartDate().isBefore(exsistedReservation.getEndDate())
-                    && exsistedReservation.getStartDate().isBefore(reservation.getEndDate())
-            ) {
-                return true;
-            }
+        if (allWithConflict.isEmpty()){
+            return false;
         }
-        return false;
+
+        String collect = allWithConflict.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(", "));
+
+        log.error("Conflict with reservations: {}", collect);
+
+        return true;
     }
     
     public Reservation approveReservation (Long id){

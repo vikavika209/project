@@ -1,4 +1,4 @@
-package com.pet.project;
+package com.pet.project.web;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
