@@ -20,6 +20,9 @@ public class ReservationAvailableController {
     public ResponseEntity<CheckAvailabilityResponse> checkAvailability (
             @Valid @RequestBody CheckAvailabilityRequest request
     ) {
+
+        log.info("Called method checkAvailability with request: {}", request);
+
         boolean available = service.isAvailable(
                 request.roomId(),
                 request.startDate(),

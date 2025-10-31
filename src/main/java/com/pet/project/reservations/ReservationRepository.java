@@ -25,7 +25,7 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
 
     @Query("""
         SELECT r.id FROM ReservationEntity r
-            WHERE r.roomId = :roomID
+            WHERE r.roomId = :roomId
                 AND :startDate < r.endDate
                 AND r.startDate < :endDate
                 AND r.reservationStatus = :status
