@@ -43,7 +43,7 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
            AND (:userId IS NULL OR r.userId = :userId)
            AND (:status IS NULL OR r.reservationStatus = :status)
     """)
-    Page<ReservationEntity> searchAllByFilter(
+    List<ReservationEntity> searchAllByFilter(
             @Param("roomId") Long roomId,
             @Param("userId") Long userId,
             @Param("status") ReservationStatus status,

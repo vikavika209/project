@@ -1,23 +1,23 @@
 package com.pet.project.reservations;
 
+import com.pet.project.reservations.availability.ReservationAvailableService;
 import com.pet.project.web.NotApprovedException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class ReservationService {
     private final ReservationRepository repo;
+    ReservationAvailableService availableService;
 
     public Reservation create (Reservation reservation){
 
@@ -65,7 +65,7 @@ public class ReservationService {
                 .ofSize(pageSize)
                 .withPage(pageNumber);
 
-        Page<ReservationEntity> allEntity = repo.searchAllByFilter(
+        List<ReservationEntity> allEntity = repo.searchAllByFilter(
                 filter.roomId(),
                 filter.userId(),
                 filter.status(),
@@ -134,26 +134,7 @@ public class ReservationService {
         return ReservationMapper.toReservation(updatedReservation);
     }
 
-    private boolean isConflict (Reservation reservation){
-        List<Long> allWithConflict = repo.findConflictReservation(
-                reservation.getRoomId(),
-                reservation.getStartDate(),
-                reservation.getEndDate(),
-                ReservationStatus.APPROVED
-        );
 
-        if (allWithConflict.isEmpty()){
-            return false;
-        }
-
-        String collect = allWithConflict.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(", "));
-
-        log.error("Conflict with reservations: {}", collect);
-
-        return true;
-    }
     
     public Reservation approveReservation (Long id){
         ReservationEntity entity = repo.findById(id)
@@ -162,7 +143,11 @@ public class ReservationService {
 
         Reservation reservation = ReservationMapper.toReservation(entity);
 
-        if (isConflict(reservation)){
+        if (!availableService.isAvailable(
+                reservation.getRoomId(),
+                reservation.getStartDate(),
+                reservation.getEndDate()
+        )){
             log.warn("Not approved due to conflict: id = {}", id);
             throw new NotApprovedException("\"Not approved due to conflict: id = " + id);
         }
