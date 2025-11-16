@@ -9,5 +9,4 @@ public record ReservationSearchFilter(
         Integer pageSize,
         Integer pageNumber
 ){
-
 }
