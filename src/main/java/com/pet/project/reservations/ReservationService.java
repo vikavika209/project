@@ -16,8 +16,11 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 public class ReservationService {
+
     private final ReservationRepository repo;
-    ReservationAvailableService availableService;
+    private final ReservationAvailableService availableService;
+    private final ReservationMapper mapper;
+
 
     public Reservation create (Reservation reservation){
 
@@ -31,11 +34,11 @@ public class ReservationService {
             throw new IllegalArgumentException("Reservation status must be empty");
         }
 
-        ReservationEntity entity = ReservationMapper.toEntity(reservation);
+        ReservationEntity entity = mapper.toEntity(reservation);
         entity.setReservationStatus(ReservationStatus.PENDING);
 
         ReservationEntity save = repo.save(entity);
-        Reservation saved = ReservationMapper.toReservation(save);
+        Reservation saved = mapper.toReservation(save);
 
         log.info("Reservation created: {}", saved.toString());
         return saved;
@@ -46,7 +49,7 @@ public class ReservationService {
 
         if (byId.isPresent()){
             ReservationEntity entity = byId.get();
-            return ReservationMapper.toReservation(entity);
+            return mapper.toReservation(entity);
         }
         else throw new EntityNotFoundException ("Not found with id = " + id);
 
@@ -72,7 +75,7 @@ public class ReservationService {
                 pageable
         );
         return  allEntity.stream()
-                .map(ReservationMapper::toReservation)
+                .map(mapper::toReservation)
                 .toList();
     }
 
@@ -104,7 +107,7 @@ public class ReservationService {
     }
 
     public Reservation updateReservation(Long id, Reservation reservation){
-        Reservation reservationById = ReservationMapper.toReservation(
+        Reservation reservationById = mapper.toReservation(
                 repo.findById(id)
                         .orElseThrow(
                                 () -> new EntityNotFoundException("Not found with id = " + id))
@@ -131,7 +134,7 @@ public class ReservationService {
 
         repo.save(updatedReservation);
 
-        return ReservationMapper.toReservation(updatedReservation);
+        return mapper.toReservation(updatedReservation);
     }
 
 
@@ -141,7 +144,7 @@ public class ReservationService {
                 .orElseThrow(() ->
                         new EntityNotFoundException("Not found with id = " + id));
 
-        Reservation reservation = ReservationMapper.toReservation(entity);
+        Reservation reservation = mapper.toReservation(entity);
 
         if (!availableService.isAvailable(
                 reservation.getRoomId(),
@@ -163,6 +166,6 @@ public class ReservationService {
                 );
 
         ReservationEntity save = repo.save(updatedReservation);
-        return ReservationMapper.toReservation(save);
+        return mapper.toReservation(save);
     }
 }
